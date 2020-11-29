@@ -21,6 +21,12 @@
 
     <div class="container">
         <h1 class="text-center display-3">Apache Server</h1>
+        <div>
+            <output id="display-area">00:00:00.000</output>
+        </div>
+        <div>
+            <button class="btn btn-secondary" id="toggle-button" onClick="stop()">Stop</button>
+        </div>
         <div class="col-lg-12 col-md-12 pt-3 p-5 text-center">
             <button id="btn" class="btn btn-primary">Load Page</button>
             <div id="photos" class="row">
@@ -33,46 +39,82 @@
     </div>
 
     <script type="text/javascript">
-
         document.getElementById('btn').addEventListener('click', loadPage, false);
+        document.getElementById('btn').addEventListener('click', start, false);
         $('#photos').hide();
 
 
-        function loadPage(){
+        function loadPage() {
 
             $('#photos').show();
             $('#btn').hide();
 
             $.ajax({
-            url: 'https://api.thecatapi.com/v1/images/search?limit=60',
-            headers: {
-                'X-api-key': 'd8ce4698-5f87-4520-ab04-e6848bd35d6e',
-                'Content-Type': 'application/json'
-            },
-            method: 'GET',
-            success: function (data) {
+                url: 'https://api.thecatapi.com/v1/images/search?limit=60',
+                headers: {
+                    'X-api-key': 'd8ce4698-5f87-4520-ab04-e6848bd35d6e',
+                    'Content-Type': 'application/json'
+                },
+                method: 'GET',
+                success: function (data) {
 
-                console.log(data);
+                    console.log(data);
 
-                for (var x = 0; x < data.length; x++) {
+                    for (var x = 0; x < data.length; x++) {
 
-                    console.log(data[x].url);
+                        console.log(data[x].url);
 
 
 
-                    photos.innerHTML +=
-                        "<div class=\"col-md-1\"><img class=\"img-responsive\" src=\"" + data[x].url +
-                        "\" alt=\"\"></div>";
+                        photos.innerHTML +=
+                            "<div class=\"col-md-1\"><img class=\"img-responsive\" src=\"" + data[x].url +
+                            "\" alt=\"\"></div>";
+
+                    }
+
 
                 }
-
-
-            }
-        });
+            });
 
         }
 
-        
+        var timeBegan = null,
+            timeStopped = null,
+            stoppedDuration = 0,
+            started = null;
+
+        function start() {
+            if (timeBegan === null) {
+                timeBegan = new Date();
+            }
+
+            if (timeStopped !== null) {
+                stoppedDuration += (new Date() - timeStopped);
+            }
+            console.log(stoppedDuration);
+
+            started = setInterval(clockRunning, 10);
+        }
+
+        function stop() {
+            timeStopped = new Date();
+            clearInterval(started);
+        }
+
+        function clockRunning() {
+            var currentTime = new Date(),
+                timeElapsed = new Date(currentTime - timeBegan - stoppedDuration),
+                hour = timeElapsed.getUTCHours(),
+                min = timeElapsed.getUTCMinutes(),
+                sec = timeElapsed.getUTCSeconds(),
+                ms = timeElapsed.getUTCMilliseconds();
+
+            document.getElementById("display-area").innerHTML =
+                (hour > 9 ? hour : "0" + hour) + ":" +
+                (min > 9 ? min : "0" + min) + ":" +
+                (sec > 9 ? sec : "0" + sec) + "." +
+                (ms > 99 ? ms : ms > 9 ? "0" + ms : "00" + ms);
+        };
     </script>
 
 </body>
